@@ -2,10 +2,11 @@
 //var title_true = 'test';
 var image_url
 var titles = ' '
-var correct
+var correct = null
 var answer
-var score = 0
+var score
 var img
+var wiki_url
 
 // meta for buttons
 var button_text_1 = 'Choice 1'
@@ -80,6 +81,9 @@ function is_they_smart(answer) {
         correct = 42
     }else{
         score = 0
+        if(correct !== null){
+            window.open(wiki_url)
+        }
     }
 }
 
@@ -91,6 +95,8 @@ function generateQuestion(){
 function getTrue(response, diag = false){
     
     //display image
+    wiki_url = response['tfa']['content_urls']['desktop']['page']
+    print(wiki_url)
     title_true = response['tfa']['titles']['normalized']
     image_url = response['tfa']['thumbnail']['source']
     img = loadImage(image_url)
