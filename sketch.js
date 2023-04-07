@@ -89,25 +89,36 @@ function is_they_smart(answer) {
 
 function generateQuestion(){
     url_true = wikiRandomUrl()
+    
+    //Get the true title, image url, and construct the api query 
+    //for for any links that linking to the true page.
     httpGet(url_true, 'json', callback = getTrue)
-}
 
-function getTrue(response, diag = false){
-    
-    //display image
-    wiki_url = response['tfa']['content_urls']['desktop']['page']
-    print(wiki_url)
-    title_true = response['tfa']['titles']['normalized']
-    image_url = response['tfa']['thumbnail']['source']
-    img = loadImage(image_url)
-    
-    url_alt = 'https://en.wikipedia.org/w/api.php?action=query&format=json&list=backlinks&blpageid='
-    url_alt = url_alt + response['tfa']['pageid']
-    
-    //get alternatives
+    //Uses the constructed queri from getTrue, and gives three alternative titles.
     httpGet(url_alt, 'jsonp', callback = getAlt)
     
+}
+
+function getTrue(response, diag = true){
+    
+    //get url for today featured article (tfa)
+    wiki_url = response['tfa']['content_urls']['desktop']['page']
+    
+    title_true = response['tfa']['titles']['normalized']
+    image_url = response['tfa']['thumbnail']['source']
+    
+    //construct api query to get information about 
+    //pages linking to this article.
+    url_alt = 'https://en.wikipedia.org/w/api.php?action=query&format=json&list=backlinks&blpageid='
+    url_alt = url_alt + response['tfa']['pageid']
+
+    //Display the image from url. 
+    //Need to be here rather than above cause it wont load otherwise.
+    img = loadImage(image_url)
+    
     if(diag){
+        print('------True URL----------')
+        print(wiki_url)
         print('------True Query----------')
         print(title_true)
         print('-------URL to backlinks-------')
@@ -117,11 +128,14 @@ function getTrue(response, diag = false){
     }
 }
 
-function getAlt(response, diag = false) {
+function getAlt(response, diag = true) {
     
+    //titles of articles that are linking
     titles = response['query']['backlinks']
+    //namespace 0 is selecting content from wiki (vs meta data)
     titles = titles.filter(page => page.ns === 0).map(page => page.title)
     
+    //shufle the titles
     titles = shuffle(titles, false)
     titles = [titles[0], titles[1], title_true]
     titles = shuffle(titles, false)
