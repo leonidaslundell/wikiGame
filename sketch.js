@@ -88,10 +88,9 @@ function is_they_smart(answer) {
 }
 
 function generateQuestion(){
-    url_true = wikiRandomUrl()
-    
     //Get the true title, image url, and construct the api query 
     //for for any links that linking to the true page.
+    url_true = wikiRandomUrl()
     httpGet(url_true, 'json', callback = getTrue)
 
     //Uses the constructed queri from getTrue, and gives three alternative titles.
@@ -99,22 +98,22 @@ function generateQuestion(){
     
 }
 
-function getTrue(response, diag = true){
+function getTrue(response, diag = false){
     
     //get url for today featured article (tfa)
     wiki_url = response['tfa']['content_urls']['desktop']['page']
     
     title_true = response['tfa']['titles']['normalized']
     image_url = response['tfa']['thumbnail']['source']
+    img = loadImage(image_url)
     
     //construct api query to get information about 
     //pages linking to this article.
     url_alt = 'https://en.wikipedia.org/w/api.php?action=query&format=json&list=backlinks&blpageid='
     url_alt = url_alt + response['tfa']['pageid']
-
-    //Display the image from url. 
-    //Need to be here rather than above cause it wont load otherwise.
-    img = loadImage(image_url)
+    
+    //get alternatives
+    httpGet(url_alt, 'jsonp', callback = getAlt)
     
     if(diag){
         print('------True URL----------')
@@ -128,7 +127,7 @@ function getTrue(response, diag = true){
     }
 }
 
-function getAlt(response, diag = true) {
+function getAlt(response, diag = false) {
     
     //titles of articles that are linking
     titles = response['query']['backlinks']
